@@ -1,0 +1,501 @@
+CLRS:
+    
+I Foundations
+    Introduction 3
+    1 The Role of Algorithms in Computing 5
+        1.1 Algorithms 5
+            - what is an ALGORITHM - procedure that takes a specific input and gives a 
+                specific output to solve a problem
+            - SORTING PROBLEM: LTX
+                Input: sequence of n numbers (a1, a2, .., an)
+                Output: a permutation/reordering of input sequence (a1', a2', ..., an')
+                    such that a1' <= a2' <= ... <= an'
+            - an INSTANCE of a problem is one example input to said problem
+            - an algorithm is CORRECT if for every possible existing input instance, it
+                halts having generated the correct output 
+            - most problems have (1) many candidate solns, making it hard to see which one
+                is the 'best' one, (2) have solns with practical applications
+            - a DATA STRUCTURE is a way to store & organize data to facilitate access/mods
+            - algorithms isn't just about knowing known algos - its about technique
+            - really hard problems are don't have an efficient solution today
+                - a subset of these are called NP-complete
+                    - nobody has proven that an efficient soln to these CANT exist
+                        - if an efficient soln exists for one, then it exists for ALL 
+            - PARALLELISM run stuff on multiple cores cuz we cant incresase clock speed. 
+        1.2 Algorithms as a technology 11
+            - if we had infinite SPEED, then we still need to design CORRECTNESS
+            - algorithms whose running time grows more slowly w.r.t. data size are much
+                faster as the data size increases
+            - algorithms are a technology too. every technology is based on algorithms
+        
+        
+    2 Getting Started 16
+        - examples. Algorithms are written in PSUEDOCODE
+        2.1 Insertion sort 16
+            - solves the SORTING PROBLEM, the values of the seq we sort are called KEYS
+            - its how humans sort (KINDA)! pick up some cards and sort them =)
+                - go from left to right and move things to the left as you go along
+            - the index J represents the current thing/card being sorted
+            - at any iteration, subarray A[1:j-1] is the currently sorted array
+                - the elements at A[1:j-1] were originally there too, but just NOW they're
+                    in sorted order
+            - A[j] is compared to A[j-1], and if smaller, A[k:j-1] is shifted one element
+                right, overwriting A[j], where A[k-1] is less than original A[j]. So
+                original A[j] takes up A[k]'s spot. 
+            - done for j= 2nd element to the end of the array.
+                    
+            O(N) best case, O(N^2) worst case        
+            INSERTION_SORT(A):
+                for j=2 to length(A)
+                    key = A[j]
+                    //insert A[j] into sorted sequence A[1..j-1]
+                    i = j - 1
+                    while i > 0 and A[i] > key
+                        A[i + 1] = A[i]
+                        i = i -1
+                    A[i + 1] = key
+                    
+            def insertion_sort(A):
+                for j in range(1,len(A)):
+                    key = A[j]
+                    i = j - 1
+                    while(i >= 0 and A[i] > key):
+                        A[i + 1] = A[i]
+                        i -= 1
+                    A[i + 1] = key
+                return A
+https://upload.wikimedia.org/wikipedia/commons/4/42/Insertion_sort.gif
+                    
+            def insertion_sort_intuitive_ACTUALLY_BUBBLESORT(A):
+                for i in range(1, len(A)):
+                    for j in range(1, len(A)):
+                        temp = A[j]
+                        if A[j] < A[j-1]:
+                            A[j] = A[j-1]
+                            A[j-1] = temp
+                return A
+            
+            - LOOP INVARIANT for insertion sort: at the start of any iteration of the loop
+            for insertion sort, the subarray A[1..j-1] consists of the elements 
+            originally in A[1..j-1] but now in sorted order.
+            
+            - Show three things about loop inavariants
+                (1) initialization: True prior to first iteration of loop
+                (2) maintenance: if true before an iteration of a loop, remains true before
+                    next iteration. 
+                        - (1) + (2) is like PMI
+                (3) termination: invariant gives useful property at loop end to help show
+                    algorithm in correct
+                        - PMI ends when loop terminate instead of infinitely like induction
+            
+            - insertion sort loop invariant proof
+                (1) A[1..j-1] before the loop starts is just A[1]. A[1] is the original
+                    A[1] and is in sorted order, trivially shown (since its one element)
+                (2) RV? dont need rigor 
+                (3) at the end of the loop, j = n + 1. By the loop invariant, then 
+                    A[1..j-1] == A[1..(n+1)-1] == A[1..n] must be in sorted order - proving
+                    the loop invariant correctly
+            
+            - psuedocode conventions - read the section if you want.
+            
+            
+        2.2 Analyzing algorithms 23
+            - INPUT SIZE depends on the problem - usually it is N=number of input items
+            - RUNNING TIME of an algorithm on an instance is the number of primtive
+                operations/steps executed. We only care about WORST-CASE running time 
+                LTX
+                
+                T(N) = c1*k1 + c2*k2 + ... + cl*kl
+                
+                is the runtime of a specific algorithm, where, for i = 1..l
+                ci is the cost of running that particular line once
+                ki is the number of times this line is run
+                l is the total number lines of code
+                    each term represents the cost of that line of code.
+                    
+            - only care about RATE OF GROWTH or ORDER OF GROWTH of running time, which is
+                why we drop constants since the rate of growth only depends on N
+                - rate efficiency off of growth rate.
+                
+        2.3 Designing algorithms 29
+            approaches include
+            - INCREMENTAL, RECURSIVE, etc. The middle usually follows DIVIDE AND CONQUER
+                (1) DIVIDE the problem into subproblems that are smaller instances of the
+                    same problem
+                (2) CONQUER the subproblems by solving them recursively. (aka, divide and
+                    conquer them as well). If small enough, solve them straightforward 
+                (3) COMBINE solutions to all subproblems into solution to original probblem
+            - MERGE SORT is a divide and conqyuer algorithm
+                (1) DIVIDE the n-element sequence into subsequences of n/2-elements each
+                (2) CONQUER the two subsequences recursively via merge sort
+                (3) COMBINE the two sorted subsequences to get the sorted original sequence
+                    - recursion here bottoms out in base case when subsequence length = 1
+                    - combine (MERGE) step is the most important for mergesort
+                    
+                    O(N) speed for merge
+                    
+                    MERGE(A, p, q, r)
+                        - A is concat of merged subarrays - p <= q < random
+                        - A[p..q] and A[q+1..r] are both sorted
+                        - returns sorted subarray A[p..r] of length n = r - p + 1
+                        - literally just goes through each sorted array from bottom to top
+                            comparing the current 'bottom' elements and adding them to the 
+                            final array after comparisons. 
+                            - has a sentinel node so we don't have to check for emptiness
+                            
+                    MERGE(A, p, q, r)
+                        n1 = q - p + 1
+                        n2 = r - q
+                        L[1..n1 + 1] be new array of length n1
+                        R[1..n2 + 1] be new array of length n2
+                        for i = 1 to n1
+                            L[i] = A[p + i - 1]
+                        for j = 1 to n2 
+                            R[j] = A[q + j]
+                        L[n1 + 1] = infinity
+                        R[n2 + 1] = infinity
+                        i = 1
+                        j = 1
+                        for k = p..r
+                            if L[i] <= R[j]
+                                A[k] = L[i]
+                                i = i + 1
+                            else
+                                A[k] = R[j]
+                                j = j + 1
+                                
+                    - book uses concept of SENTINEL or DUMMY indicator 'NODE'
+                        
+                    from copy import copy
+                    def merge(A, p, q, r):
+                        L = copy(A[p:q+1])
+                        R = copy(A[q+1:r+1])
+                        L_top = 0
+                        R_top = 0
+                        for i in range(len(a)):
+                            if L_top == len(L):
+                                A[i:] = R[R_top:]
+                                break
+                            if R_top == len(R):
+                                A[i]: = L[L_top:]
+                                break
+                            if L[L_top] < R[R_top]:
+                                A[i] = L[L_top]
+                                L_top += 1
+                            else: #L[L_top] >= R[R_top]
+                                A[i] = R[R_top]
+                                R_top += 1
+                            
+                        return A
+                        
+                LOOP invariant for merge: at the start of each iteration of the actual 
+                    merging,(i) A[p..k-1] is sorted and contains (ii) the k-p smallest 
+                    elements of L[1..n1 +1] and R[1..n2 + 1] in sorted order. (iii) L[i] and
+                    R[j] are the smallest elements of their subsequences that havent been copied
+                    back to A. 
+                
+                initialization: prior to loop entry, A[p..k-1] is empty, so (i) and (ii) holds. 
+                    (iii) holds because L and R are sorted and thus their first elements are 
+                    their smallest.
+                maintenance: RV? dont need rigor. Go through all possible cases of after each iter
+                termination: k = r + 1 at the end. subarray A[p..k-1] = A[p..r+1-1] = A[p..r+1]
+                    is sorted and etc
+                    
+                    MERGESORT(A, p, r)
+                        if p < r
+                            q = floor( (p + r) / 2 )
+                            MERGESORT(A, p, q)
+                            MERGESORT(A, q+1, r)
+                            MERGE(A, p, q, r)
+                    
+                    def mergesort(A, p, r):
+                        if p != r:
+                            q = int( (p + r) / 2)
+                            L = mergesort(A[:q+1], p, q)
+                            H = mergesort(A[q+1:], q+1, r)
+                            return merge(L + H, p, q, r)
+                        else:
+                            return A
+                
+                - can write recursive functions as RECURRENCE EQUATIONS or RECURRENCE
+                    - describes problem of size n on terms of problem on size less than N
+                    
+            - RUNNING TIME OF A DIVIDE AND CONQUER ALGORITHM. ****************** RV
+                - For an algorithm working on instance of size N, T(N) is the running time. 
+                - If N <= c, for some small constant c, then the running time is O(1)
+                - Say we divide our instance of size N into A instances/subproblems of size N/B
+                    - then it takes T(N/B) to solve one subproblem, so it takes A*T(N/B) to solve all
+                - Let D(N) be the time to divide the problem into the subproblems 
+                - Let C(N) be the time to combine solutions to the subproblems
+                LTX
+                if n <= c: T(N) = O(1)
+                if n >  c: T(N) = A*T(N/B) + D(N) + C(N)
+                
+            MERGESORT COMPLEXITY:
+                DIVIDE: computing split point takes O(1) time
+                CONQUER: splitting array in half and computing solns for both is 2*T(N/2)
+                COMBINE: merge is O(N) 
+                LTX
+                if n <= 1: T(N) = O(1)
+                if n >  1: T(N) = 2*T(N/2) + O(1) + O(N)
+                    - can use master theorem later to solve recurrence relation so T(N) = O(NLGN)
+                    - alternatively we can use intuition (SERIOUSLY?)
+                    - or we can draw a RECURSION TREE
+                        - the recursion tree has log2(n) + 1 levels (derive this.) since we 
+                            need to divide N by 2 log2(n) times to get the trivial base case
+                            length needed by mergesort, which is 1. Each level costs cn (WHY?)
+                            and since we have log2(n) + 1 levels, the complexity is cnlgn + cn
+                                - this simplifies to just O(N LG N) since we dgaf about c and cn
+                                    when we have N LG N trumping cn in the long run
+                                    
+                             
+    3 Growth of Functions 43
+        - ASYMPTOTIC efficiency - large inputs so ORDER OF GROWTH of running time is relevant
+        3.1 Asymptotic notation 43
+        (need to LATEX LTX all the definitions and theorems in this section)
+            - functions describe this have domain in natural numbers, but may be abused to reals
+            - Requires that every f(n) in THETA(g(n)) be ASYMPTOTICALLY NONNEGATIVE, aka 
+                f(n) be nonnegative whenever n is sufficiently large. ???????????? RV
+                - an ASYMPTOTICALLY POSITIVE function is the same, except positive instead nonneg
+            - ??? RV g(n) must be asymptotically nonnegative or else THETA(g(n)) empty. 
+                - same applies to all other asymptotic notations - all fcns within the notation
+                    must be assumed as asymptotically nonnegative
+            (1) BIG-THETA-notation
+                THETA(g(n)) = {f(n) : there exists constants c1, c2, n0 > 0 s.t. 
+                                0 <= c1*g(n) <= f(n) <= c2*g(n)  for all n >= n0}
+                - g(n) is an ASYMPTOTICALLY TIGHT BOUND for f(n) and f(n) = THETA(g(n))
+                - THETA(g(n)) is a subset of O(g(n)) AKA f(n)=THETA(g(n)) IMPLIES f(n)=O(g(n))
+            (2) BIG-O-notation
+                O(g(n)) = {f(n) : there exist constants c, n0 > 0 s.t.
+                            0 <= f(n) <= c*g(n) for all n >= n0}
+                - g(n) is an ASYMPTOTIC UPPER BOUND for f(n) and f(n) = O(g(n))
+            - ??? RV O(n^2) bound worst-case insertion sort also applies to its running time ALL input.
+                The THETA(n^2) bound worst-case insertion sort, however, does not imply a THETA(N^2)
+                bound on the running time of insertion sort on every input.
+            (3) BIG-OMEGA-notation
+                OMEGA(g(n)) = {f(n) : there exist constants c, n0 > 0 s.t.
+                                0 <= c*g(n) <= f(n) for all n >= n0}
+                - g(n) is an ASYMPTOTIC LOWER BOUND for f(n) and f(n) = OMEGA(g(n))
+                
+            THEOREM: for two functions f(n) and g(n), we have that
+                f(n) = THETA(g(n)) <===> f(n) = O(g(n)) AND f(n) = OMEGA(g(n))
+                
+        RV REVISIT ????????????????????????????????????????        
+"The running time of insertion sort therefore belongs to both OMEGA(N) and O(N),
+since it falls anywhere between a linear function of n and a quadratic function of n.
+Moreover, these bounds are asymptotically as tight as possible: for instance, the
+running time of insertion sort is not OMEGA(N^2), since there exists an input for which
+insertion sort runs in THETA(N) time (e.g., when the input is already sorted). It is not
+contradictory, however, to say that the worst-case running time of insertion sort
+is OMEGA(N^2), since there exists an input that causes the algorithm to take OMEGA(N^2) time."
+
+            - can use asymptotic notation to kill off alot of clutter and make conciseness
+
+            - non-tight notation doesnt give tight bound, and holds for all consts c instead of just
+                having need at least one const c exist
+            (4) little-o notation
+                o(g(n)) = {f(n) : for all const c >= 0, exists const n0 > 0 s.t.
+                            0 <= f(n) < c*g(n) for all n >= n0}
+                - f(n) is ASYMPTOTICALLY SMALLER (& not tight) than g(n) AND f(n) = o(g(n))
+                - lim n->INF of (f(n) / g(n)) = 0
+            (5) little-omega notation
+                omega(g(n)) = {f(n) : for all const c >= 0, exists const n0 > 0 s.t.
+                            0 <= c*g(n) < f(n) for all n >= n0}
+                - f(n) is ASYMPTOTICALLY LARGER (& not tight) than g(n) AND f(n) = omega(g(n))
+                - lim n->INF of (f(n) / g(n)) = INF
+                
+            - asymptotic functions follow TRANSITIVITY, REFLEXIVITY, SYMMETRY, TRANSPOSE SYMMETRY,
+                just like how real numbers do. Strong analogy b/w 5 notations and =, >, <, <=, >=
+                - however, TRICHOTOMY doesn't hold because not all fcns asymptotically comparable. 
+            
+        3.2 Standard notations and common functions 53
+            - monotonic/strictly increasing/decreasing, floor/ceil, modulo, polynomial asymptotically
+                positive, polynomially bounded, exponentials, e, logarithms, polylogarithmically 
+                bounded, factorials/stirling's approx, functional iteration, iterated log fcn, 
+                fibonacci + golden ratio
+                
+    4 Divide-and-Conquer 65
+        4.1 The maximum-subarray problem 68
+        4.2 Strassen’s algorithm for matrix multiplication 75
+        4.3 The substitution method for solving recurrences 83
+        4.4 The recursion-tree method for solving recurrences 88
+        4.5 The master method for solving recurrences 93
+        4.6 Proof of the master theorem 97
+    5 Probabilistic Analysis and Randomized Algorithms 114
+        5.1 The hiring problem 114
+        5.2 Indicator random variables 118
+        5.3 Randomized algorithms 122
+        5.4 Probabilistic analysis and further uses of indicator random variables 130
+
+II Sorting and Order Statistics
+    Introduction 147
+    6 Heapsort 151
+        6.1 Heaps 151
+        6.2 Maintaining the heap property 154
+        6.3 Building a heap 156
+        6.4 The heapsort algorithm 159
+        6.5 Priority queues 162
+    7 Quicksort 170
+        7.1 Description of quicksort 170
+        7.2 Performance of quicksort 174
+        7.3 A randomized version of quicksort 179
+        7.4 Analysis of quicksort 180
+    8 Sorting in Linear Time 191
+        8.1 Lower bounds for sorting 191
+        8.2 Counting sort 194
+        8.3 Radix sort 197
+        8.4 Bucket sort 200
+    9 Medians and Order Statistics 213
+        9.1 Minimum and maximum 214
+        9.2 Selection in expected linear time 215
+        9.3 Selection in worst-case linear time 220
+
+III Data Structures
+    Introduction 229
+    10 Elementary Data Structures 232
+        10.1 Stacks and queues 232
+        10.2 Linked lists 236
+        10.3 Implementing pointers and objects 241
+        10.4 Representing rooted trees 246
+    11 Hash Tables 253
+        11.1 Direct-address tables 254
+        11.2 Hash tables 256
+        11.3 Hash functions 262
+        11.4 Open addressing 269
+        11.5 Perfect hashing 277
+    12 Binary Search Trees 286
+        12.1 What is a binary search tree? 286
+        12.2 Querying a binary search tree 289
+        12.3 Insertion and deletion 294
+        12.4 Randomly built binary search trees 299
+    13 Red-Black Trees 308
+        13.1 Properties of red-black trees 308
+        13.2 Rotations 312
+        13.3 Insertion 315
+        13.4 Deletion 323
+    14 Augmenting Data Structures 339
+        14.1 Dynamic order statistics 339
+        14.2 How to augment a data structure 345
+        14.3 Interval trees 348
+        
+IV Advanced Design and Analysis Techniques
+    Introduction 357
+    15 Dynamic Programming 359
+        15.1 Rod cutting 360
+        15.2 Matrix-chain multiplication 370
+        15.3 Elements of dynamic programming 378
+        15.4 Longest common subsequence 390
+        15.5 Optimal binary search trees 397
+    16 Greedy Algorithms 414
+        16.1 An activity-selection problem 415
+        16.2 Elements of the greedy strategy 423
+        16.3 Huffman codes 428
+        16.4 Matroids and greedy methods 437
+        16.5 A task-scheduling problem as a matroid 443
+    17 Amortized Analysis 451
+        17.1 Aggregate analysis 452
+        17.2 The accounting method 456
+        17.3 The potential method 459
+        17.4 Dynamic tables 463
+
+V Advanced Data Structures
+    Introduction 481
+    18 B-Trees 484
+        18.1 Definition of B-trees 488
+        18.2 Basic operations on B-trees 491
+        18.3 Deleting a key from a B-tree 499
+    19 Fibonacci Heaps 505
+        19.1 Structure of Fibonacci heaps 507
+        19.2 Mergeable-heap operations 510
+        19.3 Decreasing a key and deleting a node 518
+        19.4 Bounding the maximum degree 523
+    20 van Emde Boas Trees 531
+        20.1 Preliminary approaches 532
+        20.2 A recursive structure 536
+        20.3 The van Emde Boas tree 545
+    21 Data Structures for Disjoint Sets 561
+        21.1 Disjoint-set operations 561
+        21.2 Linked-list representation of disjoint sets 564
+        21.3 Disjoint-set forests 568
+        21.4 Analysis of union by rank with path compression 573
+    
+VI Graph Algorithms
+Introduction 587
+    22 Elementary Graph Algorithms 589
+        22.1 Representations of graphs 589
+        22.2 Breadth-first search 594
+        22.3 Depth-first search 603
+        22.4 Topological sort 612
+        22.5 Strongly connected components 615
+    23 Minimum Spanning Trees 624
+        23.1 Growing a minimum spanning tree 625
+        23.2 The algorithms of Kruskal and Prim 631
+    24 Single-Source Shortest Paths 643
+        24.1 The Bellman-Ford algorithm 651
+        24.2 Single-source shortest paths in directed acyclic graphs 655
+        24.3 Dijkstra’s algorithm 658
+        24.4 Difference constraints and shortest paths 664
+        24.5 Proofs of shortest-paths properties 671
+    25 All-Pairs Shortest Paths 684
+        25.1 Shortest paths and matrix multiplication 686
+        25.2 The Floyd-Warshall algorithm 693
+        25.3 Johnson’s algorithm for sparse graphs 700
+    26 Maximum Flow 708
+        26.1 Flow networks 709
+        26.2 The Ford-Fulkerson method 714
+        26.3 Maximum bipartite matching 732
+        26.4 Push-relabel algorithms 736
+        26.5 The relabel-to-front algorithm 748
+
+VII Selected Topics
+    Introduction 769
+    27 Multithreaded Algorithms 772
+        27.1 The basics of dynamic multithreading 774
+        27.2 Multithreaded matrix multiplication 792
+        27.3 Multithreaded merge sort 797
+    28 Matrix Operations 813
+        28.1 Solving systems of linear equations 813
+        28.2 Inverting matrices 827
+        28.3 Symmetric positive-definite matrices and least-squares approximation 832
+    29 Linear Programming 843
+        29.1 Standard and slack forms 850
+        29.2 Formulating problems as linear programs 859
+        29.3 The simplex algorithm 864
+        29.4 Duality 879
+        29.5 The initial basic feasible solution 886
+    30 Polynomials and the FFT 898
+        30.1 Representing polynomials 900
+        30.2 The DFT and FFT 906
+        30.3 Efficient FFT implementations 915
+    31 Number-Theoretic Algorithms 926
+        31.1 Elementary number-theoretic notions 927
+        31.2 Greatest common divisor 933
+        31.3 Modular arithmetic 939
+        31.4 Solving modular linear equations 946
+        31.5 The Chinese remainder theorem 950
+        31.6 Powers of an element 954
+        31.7 The RSA public-key cryptosystem 958
+        31.8 Primality testing 965
+        31.9 Integer factorization 975
+    32 String Matching 985
+        32.1 The naive string-matching algorithm 988
+        32.2 The Rabin-Karp algorithm 990
+        32.3 String matching with finite automata 995
+        32.4 The Knuth-Morris-Pratt algorithm 1002
+    33 Computational Geometry 1014
+        33.1 Line-segment properties 1015
+        33.2 Determining whether any pair of segments intersects 1021
+        33.3 Finding the convex hull 1029
+        33.4 Finding the closest pair of points 1039
+    34 NP-Completeness 1048
+        34.1 Polynomial time 1053
+        34.2 Polynomial-time verification 1061
+        34.3 NP-completeness and reducibility 1067
+        34.4 NP-completeness proofs 1078
+        34.5 NP-complete problems 1086
+    35 Approximation Algorithms 1106
+        35.1 The vertex-cover problem 1108
+        35.2 The traveling-salesman problem 1111
+        35.3 The set-covering problem 1117
+        35.4 Randomization and linear programming 1123
+        35.5 The subset-sum problem 1128

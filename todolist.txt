@@ -1,0 +1,25 @@
+- how to derive complexity in all cases
+    - specifically for every case thats like log n 
+    - or for cases DP cases that dont do DP & are exponential
+- what are bitwise ops (i know what they are.)
+    - power set problem bitwise ops
+        - from two above pts - power set using DP!!!
+- DYNAMIC PROGRAMMING - ALL THINGS AND EVERYTHING - knapsack 
+https://programming.guide/dynamic-programming-vs-memoization-vs-tabulation.html
+https://stackoverflow.com/questions/6184869/what-is-the-difference-between-memoization-and-dynamic-programming
+    - caching from ground up tabulation - (instead or versus of top down - memoization)
+        - tabulation is faster when all subproblems need to be solved multiple times
+            - iterative usually 
+        - memoization is faster when only a select subproblems need to be solved multiple times.
+            - recursive usually - has function call stack space complexity usage. 
+- invariant problems use some feature of what we already know that stays that way throughout the problem
+- know graphs inside out math bro
+- review concurrency constructs in PYTHON - get some practice. 
+            
+            
+ CLRS:
+ - derivation of time complexity of a divide and conquer algorithm which has a base case requiring 
+    only c elements, divides the N-length set into N/b length subsets, where there are a subproblems
+        - what is the height of the recursion tree? then you can get the complexity of the algorithm
+            (minus divide D(N) and combine C(N) costs
+            
