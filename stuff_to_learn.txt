@@ -4,7 +4,7 @@
 - what are bitwise ops (i know what they are.)
     - power set problem bitwise ops
         - from two above pts - power set using DP!!!
-- DYNAMIC PROGRAMMING - ALL THINGS AND EVERYTHING - knapsack 
+- DYNAMIC PROGRAMMING - knapsack
 https://programming.guide/dynamic-programming-vs-memoization-vs-tabulation.html
 https://stackoverflow.com/questions/6184869/what-is-the-difference-between-memoization-and-dynamic-programming
     - caching from ground up tabulation - (instead or versus of top down - memoization)
@@ -14,7 +14,7 @@ https://stackoverflow.com/questions/6184869/what-is-the-difference-between-memoi
             - recursive usually - has function call stack space complexity usage. 
 - invariant problems use some feature of what we already know that stays that way throughout the problem
 - know graphs inside out math bro
-- review concurrency constructs in PYTHON - get some practice. 
+- review concurrency constructs
             
             
  CLRS:
