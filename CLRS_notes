@@ -163,7 +163,7 @@ https://upload.wikimedia.org/wikipedia/commons/4/42/Insertion_sort.gif
                             else
                                 A[k] = R[j]
                                 j = j + 1
-                                
+                    - NOTE that MERGE doesn't operate in place
                     - book uses concept of SENTINEL or DUMMY indicator 'NODE'
                         
                     from copy import copy
@@ -240,10 +240,12 @@ https://upload.wikimedia.org/wikipedia/commons/4/42/Insertion_sort.gif
                 if n >  1: T(N) = 2*T(N/2) + O(1) + O(N)
                     - can use master theorem later to solve recurrence relation so T(N) = O(NLGN)
                     - alternatively we can use intuition (SERIOUSLY?)
-                    - or we can draw a RECURSION TREE
+                    - or we can draw a RECURSION TREE RV
                         - the recursion tree has log2(n) + 1 levels (derive this.) since we 
-                            need to divide N by 2 log2(n) times to get the trivial base case
+                            need to divide N by 2, log2(n) times to get the trivial base case
                             length needed by mergesort, which is 1. Each level costs cn (WHY?)
+                            b/c adding up the cost of MERGE on each level besides the bottom yields
+                            cn - the bottom is due to having n nodes of size 1 (base case costs c as well)
                             and since we have log2(n) + 1 levels, the complexity is cnlgn + cn
                                 - this simplifies to just O(N LG N) since we dgaf about c and cn
                                     when we have N LG N trumping cn in the long run
@@ -315,24 +317,149 @@ is OMEGA(N^2), since there exists an input that causes the algorithm to take OME
                 fibonacci + golden ratio
                 
     4 Divide-and-Conquer 65
+        (1) DIVIDE the problem into subproblems that are smaller instances of the
+            same problem
+        (2) CONQUER the subproblems by solving them recursively. (aka, divide and
+            conquer them as well). If small enough, solve them straightforward 
+        (3) COMBINE solutions to all subproblems into solution to original problem
+        - the RECURSIVE CASE is when problems are big enough to solve recursively/conquer
+        - the BASE CASE is when recursion bottoms out and subproblems are small enough to be solved fast
+            - subproblems actually not actually be all the same format
+        - a RECURRENCE is an eqn/inequality defining a function in terms of smaller inputs
+        - a recurrence inequality we solve to get OMEGA(N) or O(N) (instead of eqn where we get THETA(N))
+        - assumptions: USUALLY ignore floors/ceil & bdry conditions (for small/const input size)
+        
         4.1 The maximum-subarray problem 68
+            PROBLEM: same as EPI intro problem. Given an array where the ith entry is the stock 
+            price on day i (thus the days are sequential w.r.t. the indices), find the maximum 
+            possible margin (ie find the max difference in the array s.t. the smaller value occurs
+            before the larger value)
+            
+            - brute force soln - compute for all pairs of days = n choose 2 = theta(N^2)
+            
+            (my epi solution)
+            def max_margin(A):
+                current_smallest_element = A[0]
+                Max = float("-Inf")
+                for item in A:
+                    if item > current_smallest_element:
+                        if item - current_smallest_element > Max:
+                            Max = item - current_smallest_element
+                        else:
+                            current_smallest_element = item
+                return Max
+            
+            - CONVERT this problem into a max-subarray problem by generating an array of
+            length len(A) - 1, where the i-th index of this new array is the sum of A[i] and
+            A[i-1]
+            
+            Divide and conquer algorithm:
+            - still followed paradigm of DIVIDE, CONQUER, COMBINE. 
+            - want to divide into two N/2 sized subarrays, recursing. 
+            - base case is when N = 1, max subarray at N=1 is itself
+            
+            - the max subarray, after DIVIDE, then must be inside either
+                (1) the left subarray (from index 0 to mid)
+                (2) the right subarray (from index mid+1 to len(arr)-1)
+                (3) must cross the middle. 
+                - (1) and (2) follow divide and conquer steps, so its easier
+                - (3) does not, so it must be in the combine step, and needs thinking
+            - the max crossing subarray MUST consist of two subarrays whose indices 
+                end at mid for the left subarray, and begin at mid+1 for the right subarray
+                - the max crossing subarray then is the concat of those two outputs
+                - checking all subarrays on left subarray ending at M costs N/2, 
+                    and same with on right, so it is a O(N) operation.
+            
+            FIND-MAX-CROSSING-SUBARRAY(A, low, mid, high)
+                left_sum = -Inf
+                max_left = mid
+                sum = 0
+                for i = mid to low
+                    sum = sum + A[i]
+                    if sum > left_sum
+                        left_sum = sum
+                        max_left = i
+                right_sum = -Inf
+                max_right = mid + 1
+                sum = 0
+                for j = mid + 1 to high
+                    sum = sum + A[j]
+                    if sum > right_sum
+                        right_sum = sum
+                        max_right = j
+                return (max_left, max_right, left_sum + right_sum)
+            
+            - Now we build the recursive framework
+            
+            FIND-MAX-SUBARRAY(A, low, high)
+                if low == high
+                    return (low, high, A[low])
+                mid = (high + low + 1) / 2
+                left_low, left_high, left_sum = FIND-MAX-SUBARRAY(A, low, mid)
+                right_low, right_high, right_sum = FIND-MAX-SUBARRAY(A, mid+1, high)
+                cross_low, cross_high, cross_sum = FIND-MAX-CROSSING-SUBARRAY(A, low, mid, high)
+                if left_sum >= right_sum and left_sum >= cross_sum
+                    return left_low, left_high, left_sum
+                else if right_sum >= left_sum and right_sum >= cross_sum
+                    return right_low, right_high, right_sum
+                else
+                    return cross_low, cross_high, cross_sum
+                    
+            FIND-MAX-SUBARRAY complexity
+                - Each line costs O(1), except for FIND-MAX-SUBARRAY, which is T(N/2)
+                    and FIND-MAX-CROSSING-SUBARRAY, which is O(N). 
+                    - analysis is SAME as mergesort. read that one
+            RV
+            Kadane's algorithm (also linear)
+            def max_subarray(A):
+                max_ending_here = max_so_far = A[0]
+                for x in A[1:]:
+                    max_ending_here = max(x, max_ending_here + x)
+                    max_so_far = max(max_so_far, max_ending_here)
+                return max_so_far
+                    
+            def max_subarray_linear(A):
+                Max_global = float("-Inf")
+                Low_global = High_global = None
+                Max_local = 0
+                Low_local = 0
+                for i in range(len(A)):
+                    Max_local += A[i]
+                    if Max_local > Max_global:
+                        Low_global = Low_local
+                        High_global = i
+                        Max_global = Max_local
+                    if Max_local < 0:
+                        Max_local = 0
+                        Low_local = i + 1
+                return (Low_global, High_global, Max_global)  
+            
+        
         4.2 Strassen’s algorithm for matrix multiplication 75
-        4.3 The substitution method for solving recurrences 83
-        4.4 The recursion-tree method for solving recurrences 88
-        4.5 The master method for solving recurrences 93
-        4.6 Proof of the master theorem 97
+            
+            SQUARE-MATRIX-MULTIPLY(A,B)
+                N = A.rows
+                C = new NxN matrix
+                for i = 1 to N
+                    for j = 1 to N                        C[i][j] = 0                        for k = 1 to N                            C[i][j] = C[i][j] + A[i][k] * B[k][j]                return C
+            - COMPLEXITY: THETA(N^3)                    - DIVIDE AND CONQUER for matrix product: divide matrix into 4 n/2 x n/2 matrices                        SQUARE-MATRIX-MULTIPLY-RECURSIVE(A, B)                N = A.rows                C = new NxN matrix                if N == 1                    C[1][1] = A[1][1] * B[1][1]                else                    M = (N / 2)                     one = 1:M                    two = M+1:N-1                    C[one][one] =                         SQUARE-MATRIX-MULTIPLY-RECURSIVE(A[one][one], B[one][one]) +                        SQUARE-MATRIX-MULTIPLY-RECURSIVE(A[one][two], B[two][one])                    C[one][two] =                         SQUARE-MATRIX-MULTIPLY-RECURSIVE(A[one][one], B[one][two]) +                        SQUARE-MATRIX-MULTIPLY-RECURSIVE(A[one][two], B[two][two])                    C[two][one] =                         SQUARE-MATRIX-MULTIPLY-RECURSIVE(A[two][one], B[one][one]) +                         SQUARE-MATRIX-MULTIPLY-RECURSIVE(A[two][two], B[two][one])                    C[two][two] =                        SQUARE-MATRIX-MULTIPLY-RECURSIVE(A[two][one], B[one][two]) +                        SQUARE-MATRIX-MULTIPLY-RECURSIVE(A[two][two], B[two][two])                                return C            - cost of divide is O(1) b/c index slicing            - cost of each call is T(N/2) since we define T(N) to be the cost of multiplying            two NxN matrices and each call is multiplying two N/2 X N/2 matrices. 8 calls            - cost of combine is O(N^2) b/c each addition is going through a submatrix            that is N/2 x N/2, therefore has N^2/4 elements, and there's 4 submatrices,             so 4 * n^2/4 is N^2. (for the latter could just say O notation drops 1/4)            T(N) = a * T(N/b) + D(N) + C(N)            T(N) = 8 * T(N/2) + O(1) + O(N^2)  . Use master theorem to solve and get            - strassen's method                (1) divide A & B & output C into 4 n/2xn/2 matrices like ^^^. Cost O(1)                (2) create 10 matrices all n/2xn/2 that are sums/diffs of (1). O(N^2)                (3) using (1) and (2), recursively compute 7 products of n/2 x n/2                (4) compute C11 C12 C21 C22 of result by add/subtract in (3). O(N^2)                T(N) = 7*T(N/2) + O(N^2)
+        4.3 The substitution method for solving recurrences 83            (1) Guess the form of the solution            (2) Use PMI to find constants and show solution works
+        4.4 The recursion-tree method for solving recurrences 88            - each node of the tree represents the cost of a single subproblem.            - GETTING DEPTH.                - if the algorithm taking N inputs splits the problem into subproblems of size N/B,                    then the subproblem size for a node at depth i is (N/(B^i))                    - there are A^i nodes at depth i (kinda pointless for this part)                    - the depth when subproblem size is 1 is then 1 = (N/(B^i))                         => i = LOG BASE B OF N                         - change 1 to M = minimum size for base case and we get                        M = (N /(B^i)) => B^i = N/M => i = LOG base B of (N/M)                            - i is the height of the recursion tree             - PER LEVEL COST.                - the algorithm splits N inputs into N/B subinputs for A subproblems                - let f(n) be the cost for D(N) and C(N) combined                - the cost at level i is then (A^i) * f(N/(B^i))                    - the cost of one node at level i is then just f(N/(B^i))                    - there are A^i nodes at level i                - the cost at the ground/leaf level is A^(LOG base B of (N/M))                    - there are that many nodes at the bottom                    - A^(LOG base B of N) == N^(LOG BASE B OF A) == cost at bottom            - the cost for the entire tree is then                T(N) = A^(LOG base B of (N/M))                     + SUM from (i=0 to LOG base B of (N/M) - 1) OF [(A^i) * f(N/(B^i))]                            - assuming that the cost at base case is 1            - MISC: the number of nodes in a tree follows a geometric series -.<                        - when given subinput splitting s.t. subinputs are not equal, follow the                 tree branch where the subinput splitting retains the most element                    - ex: T(n) = T(n/3) + T(2n/3) + O(n)                        - B IS NOT 2/3 here, its 3/2!!!!!!!!                        - follow T(2n/3) down to m (which is the base case, probably 1)                            - depth (when base case =1) = LOG base 3/2 of N                        - use the equations above.                        - its messy though, but intuitively we expect the complexity to be                            on the order of the number of levels times the cost at each level                        - (log base 3/2 of N + 1) levels * (n) cost of combine+divide each level                            - n * log base 3/2 of n = n log n
+        4.5 The master method for solving recurrences 93            - if we have a recurrence of the form                (1) T(N) = a*T(n/b) + f(n)                (2) a >= 1 & b > 1 are BOTH constants, and                 (3) f(n) is an asymptotically positive function                     - we can quickly solve this recurrence using the master method.                        MASTER THEOREM:            Let a >= 1 and b > 1 be constants. Let f(n) be a function. Let T(n) be defined            on the nonnegative integers by the recurrence                T(n) = a*T(n/b) + f(n)            where we interpret n/b to mean either floor(n/b) or ceil(n/b). Then, T(n)            has the following asymptotic bounds (E is epsilon here):                (1) If f(n) = O(n ^ log base b of (a - E)) for some constant E > 0,                    then T(n) = THETA(n ^ log base b of a)                (2) If f(n) = THETA(n ^ (log base b of a)),                     then T(n) = THETA( (n ^ (log base b of a)) * log n)                (3) if f(n) = OMEGA(n ^ log base b of (a + E)) for some constant E > 0,                    AND if a*f(n/b) <= c*f(n) for some constant c < 1 and all large n,                    then T(n) = THETA(f(n))                        - BASIC IDEA:             (i) evaluate LOG BASE B OF A.                (ii) compare with the POWER of f(n)            (iii) pick (1) (2) or (3) depending on the comparison                - under (1) and (3), (log base b of a) has to be POLYNOMIALLY greater or                    less than power(f(n)) to use master theorem                    - for example, n^(log base b of a) = n^1 <= n lg n, but is not                         polynomially larger, so we can't apply (3) here.                - NOTE: there is a gap between 2 and 3 and 1 and 2 such that ^^ applies            - the master theorem is super important. IT reads it as says.                
+        4.6 Proof of the master theorem 97
     5 Probabilistic Analysis and Randomized Algorithms 114
-        5.1 The hiring problem 114
-        5.2 Indicator random variables 118
+        5.1 The hiring problem 114            - I get a hire rec from agency every day. Committed to having best always.                 costs money to fire and hire and pay agency. want to estimate cost.                        HIRE-ASSISTANT(N)                best = 0                 for i = 1 to N                    interview candidate i                    if candidate i is better than candidate best                        best = i                        hire i            complexity: O(c_i * n + c_h * m). m = # hired. c_i = cost interview. c_h = cost hire                    - the AVERAGE CASE RUNNING TIME is the running time of an algorithm averaged                over the distribution of all possible inputs                - you might want to assign a weight to each possible input =)            - a UNIFORM RANDOM PERMUTATION is one where any of the possible permutations                occur with equal probability            - a RANDOMIZED algorithm is random if inputted is via RNG or input values are random            - a PSUEDORANDOM NG is deterministic but the outputs look random                - EXPECTED RUNNING TIME is the running time of a randomized algorithm                    - not the same as algorithms where just the input is random. Those are nomies
+        5.2 Indicator random variables 118            - basically is a random variable that allows terms in a sequence to occur or not occur                - takes on values of 1 and 0 only - obv if 1, its producted term occurs, otherwise doesnt            LEMMA: Given a sample space S and an event A in the sample space S, let X_A = I{A}.                Then, E[X_A] = Pr{A}
         5.3 Randomized algorithms 122
         5.4 Probabilistic analysis and further uses of indicator random variables 130
 
 II Sorting and Order Statistics
-    Introduction 147
-    6 Heapsort 151
-        6.1 Heaps 151
-        6.2 Maintaining the heap property 154
-        6.3 Building a heap 156
+    Introduction 147        - a RECORD is a collection of data, whose elements are KEYS used for sorting. SATELLITE            DATA is data that comes along with the keys.         - a sorting algorithm sorts IN PLACE if a const num of elements of input array are stored
+            outside the array. Any more and it is no longer considered in place        - INSERTION SORT is good in-place for small inputs since its nested loop is tight,             even though it runs in O(N^2)         - MERGESORT is faster (O NLGN) but uses O(N) space in MERGE/COMBINE step.        - HEAPSORT sorts in place in NLGN using a heap        - QUICKSORT sorts in place in N^2 worst-case, but actually avgs at NLGN. Good for LARGE sets            - above is all COMPARISON SORTS - determine order by comparing elements.                 - there is a proof that the fastest possible comparison sort must be NLGN        - COUNTING SORT, RADIX SORT, BUCKET SORT require assumptions on the dataset, but can             operate in O(N) linear time         Let T = THETA, and O be Big-O                                WORST-CASE              AVERAGE/EXPECTED        Insertion sort          T(N^2)                  T(N^2)        Merge sort              T(N LG N)               T(N LG N)        Heapsort                O(N LG N)               not analyzed in this book        Quicksort               T(N^2)                  T(N LG N)        Counting sort           T(k + n)                T(k + n)        Radix sort              T(d(n + k))             T(d(n + k))        Bucket sort             T(N^2)                  T(N)
+    6 Heapsort 151        - in-place like insertion sort (doesnt waste space)! NLGN like mergesort (FAST!!!)        - uses a MAX heap data structure (not a min heap!)
+        6.1 Heaps 151            - binary tree complete except maybe lowest level            - representable as array. convention has length be total length of array, and heap-size                to be the length of the array actually used by the current heap 0<=heapsize<=len            - heap root at A[1] (first element of array)            - given a node i, (aka node in heap as eleemnt in array                PARENT node is floor(i/2)   - implemented as right-shift                LEFT CHILD node is 2i       - implemented as left-shift                RIGHT CHILD node is 2i + 1  - implemented as left-shift + 1            - MIN HEAPS have smallest value at root, MAX HEAPS have largest value at root            - HEAP PROPERTY is that for every node besides the root, the parent of this node                 must be <= or >= this node, analogous to MIN-HEAP-PROP & MAX-HEAP-PROP resp.            - the HEIGHT of a node in the heap is the longest downward path from this node to a leaf                - HEIGHT OF A TREE is just the height of the root = THETA(LG N)                        MAX-HEAPIFY O(LG N) - maintains max-heap property            BUILD-MAX-HEAP O(N) - generates max-heap from random array.            HEAPSORT O(N LG N)  - sorts an array in place                        MAX-HEAP-INSERT, HEAP-EXTRACT-MAX, HEAP-INCREASE-KEY, HEAP-MAX - O(LG N)                - help make a heap a priority queue            LEFT(i) { return 2i }            RIGHT(i) { return 2i + 1 }            PARENT(i) { return floor(i/2) }
+        6.2 Maintaining the heap property 154            - takes in an array (a heap!) and an index. questions if the node at this                 index satisfies the heap property. Compares it, its left kid, and right kid                altogether. The largest value of the three is swapped with its position (in                 line with max heap property) and we recursively call it again to make sure                the value swapped also satisfies heap property with its new children. LG N b/c                 can only make LG N recursive calls since that is the height of whole tree.                        MAX-HEAPIFY(A, i)                l = LEFT(i)                r = RIGHT(i)                if l <= A.heap_size and A[l] > A[i]                    largest_index = l                else                    largest_index = i                if r <= A.heap_size and A[r] > A[largest_index]                    largest_index = r                if largest_index != i                    temp = A[largest_index]                    A[largest_index] = A[i]                    A[i] = temp                    MAX-HEAPIFY(A, largest_index) #no longer largest and in question.                        Complexity:                T(N) <= T(2n/3) + O(1) -----> T(N) <= O(n^ log base 3/2 of 1 * LG N) = O(LG N). master thmhttps://math.stackexchange.com/questions/181022/worst-case-analysis-of-max-heapify-procedure                OR, T(N) for MAX-HEAPIFY on a node of height H is O(H) 
+        6.3 Building a heap 156            - 
         6.4 The heapsort algorithm 159
         6.5 Priority queues 162
     7 Quicksort 170

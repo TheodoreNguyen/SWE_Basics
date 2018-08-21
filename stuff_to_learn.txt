@@ -15,11 +15,16 @@ https://stackoverflow.com/questions/6184869/what-is-the-difference-between-memoi
 - invariant problems use some feature of what we already know that stays that way throughout the problem
 - know graphs inside out math bro
 - review concurrency constructs
-            
-            
+- know mathematics/combinatorics/probability theory
+    - combination - n choose k, C(n, k), _nC_k,  ( n   k ),   n! / (k! (n - k)!)
+    - permutation - P(n, k), _nP_k,  n! / (n - k)!
+    
  CLRS:
  - derivation of time complexity of a divide and conquer algorithm which has a base case requiring 
     only c elements, divides the N-length set into N/b length subsets, where there are a subproblems
         - what is the height of the recursion tree? then you can get the complexity of the algorithm
-            (minus divide D(N) and combine C(N) costs
+            (minus divide D(N) and combine C(N) costs- use master theorem. you should probably find out how to do recursion trees PERFECTLY thoughas well as whatever the 3rd method was
             
+- max subarray return. all solutions. popular problem!
+    - how is the max-margin problem converted to max-subarray? do not fully understand
+- LOOK AT SUPER POPULAR PROBLEMS.- skipped randomized algorithms, probability theory, expectation, indicator random vars    - therefore, probably skipping         - randomized quicksort        - bucket sort        - selection in expected linear time    ----- HASH TABLE COLLISON will NOT BE SKIPPED but we will use common sense.        - randomized binary search treesFOCUS:XXXX    - SORTING ALGORITHMS            - 2.1            - 2.3            - 6            - 7            - 8XXXX    - DIVIDE AND CONQUER             - 2.3            - 4XXXX    - ASYMPTOTIC AND COMPLEXITY ANALYSIS            - 2.2            - 3            - 2, 3, 4            XXXX    - 10. ARRAYS, LINKED LISTS, STACKS, QUEUES, TREESXXXX    - 11. HASH TABLES AND HASH FUNCTIONSXXXX    - 12. BSTsXXXX    - 15. DPXXXX    - 16. GREEDY ALGOSXXXX    - 22, 23, 24. GRAPH ALGORITHMS (SELECTED)XXXX    - 27. MULTITHREADED ALGORITHMSXXXX    - 34, 35. NP-COMPLETENESS 
