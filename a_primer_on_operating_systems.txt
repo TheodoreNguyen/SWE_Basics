@@ -1,0 +1,222 @@
+three easy pieces to operating systems: 
+    - VIRTUALIZATION, CONCURRENCY, PERSISTENCE
+
+Operating systems - 
+    CONCURRENCY:
+        - producer/consumer?
+        PROCESSES AND THREADS: When you run a program, the operating system generates
+            a virtual address space for that specific program, and then a process is
+            generated for that program, and exactly one thread is generated within that 
+            process, to actually execute that program. More threads may be created within
+            that process to execute that process more effectively. Processes generally
+            can't access anything outside its virtual address space - they must ask the OS or
+            operating system to operate on things outside its space, therefore since threads 
+            are within or part of a process, they follow those same restrictions. 
+            VIRTUAL ADDRESS SPACE of a process consisting of a single thread:
+                BOTTOM [|STACK|--FREE MEMORY GROW RIGHT-->|HEAP|PROGRAM CODE|] TOP
+            VIRTUAL ADDRESS SPACE of a process consisting of a two threads:
+                BOTTOM [|STACK1|-FREE-|STACK2|--FREE-->|HEAP|PROGRAM CODE|] TOP
+                
+            PROCESS CTCI: A process can be thought of as an instance of a program in execution. 
+                A process is an independent entity to which system resources (e.g., CPU time and 
+                memory) are allocated. Each process is executed in a separate address space, and one 
+                process cannot access the variables and data structures of another process. If a
+                process wishes to access another process' resources, inter-process communications 
+                have to be used. These include pipes, files, sockets, and other forms.
+                
+            THREAD CTCI: A thread exists within a process and shares the process' resources 
+                (including its heap space). Multiple threads within the same process will share 
+                the same heap space. This is very different from processes, which
+                cannot directly access the memory of another process. Each thread still has its 
+                own registers and its own stack, but other threads can read and write the heap 
+                memory. A thread is a particular execution path of a process. When one thread 
+                modifies a process resource, the change is immediately visible to sibling threads.
+                
+        ATOMIC OPERATIONS: occur in a single step, at once (at least to the rest of
+            the system), but most importantly are NOT interruptible. They can either
+            fail or succeed - nothing else. 
+            
+        MUTUAL EXCLUSION: a thread of execution will never enter its critical section
+            the same time another thread enters its critical section.
+        
+        CRITICAL SECTION: section/part of a thread's routine where a thread accesses ability
+            shared resource which can be accessed by other threads. Usually protected.
+        
+        LOCKS: general term for the mechanism at which a resource or 'something' that is
+            needed or operated on by multiple threads/processes that may be trying to 
+            use that thing at the same time s.t. the threads must be permitted by the lock
+            before going to use the resource.
+        
+        MUTEXES: a type of lock. Stands for MUTual EXclusion. A mutex guards a specific
+            one resource/resource group/thing. A thread can work on this thing IFF it
+            has acquired the mutex for this thing. There's only one mutex, so only one
+            thread can acquire it and work on it at one time
+        
+        SEMAPHORES: a type of lock. essentially is a multi-mutex. Given the specific instance
+            a resource/resource group/thing, a semaphore puts a limit on the number of 
+            threads that can be working on that thing/have that resource at the same time.
+            Essentially a mutex is a semaphore for which N = 1, where N is the maximum number
+            of threads that can be working on the resource at the same time.
+        
+        MONITORS: Basically a 'synchronization construct' or 'thread-safe' class/
+            module/object/thingy that wraps around a mutex to allow access to a 
+            resource by more than one thread. MUTUAL EXCLUSION is the key property - 
+            at most one thread can be executing its methods at any point in time. 
+            Usually consists of a mutex and a bunch of condition variables. That
+            provide ability for other threads to wait (spin, sleep, etc) for resource
+        
+        CONCURRENCY ISSUES:
+            RACE CONDITION: 
+                - usually results in undefined behavior. Multiple threads/processes
+                work on the same thing, and the order at which they work on it 
+                changes the result. nondeterministic. Usually fixed with regular
+                concurrency constructs. Not even sure if it should be in this section
+        
+            DEADLOCK: 
+                -> thread1 and thread2 both need resource1 and resource2 
+                for their routines, which can only be accessed by a thread
+                holding lock1 and lock2, respectively. Let thread1 grab lock1
+                to access resource1, and let thread2 grab lock2 to access 
+                resource2 at pretty much the same time. Then, later in their
+                respective routines, both still holding their locks, thread1
+                now needs to access resource2, and thread2 needs to access 
+                resource1. Both wait indefinitely since they're both waiting
+                for each other, so they essentially block each other.
+                    -> don't let a thread have multiple resources pleaseee
+                
+                - deadlock occurring conditions. ALL FOUR must occur at SAME TIME.
+                (1) MUTUAL EXCLUSION: Only one process can access a resource 
+                    at a given time/a limited number of processes can access
+                    the resource/ the resource is limited. (aka not just one maybe)
+                (2) HOLD AND WAIT: Processes already holding a resource/lock 
+                    request additional resources without relinquishing their
+                    current one.
+                (3) NO PREEMPTION: One process cannot forcibly remove another 
+                    process' resource
+                (4) CIRCULAR WAIT: Two or more processes form a circular chain
+                    where each process is waiting on another resource in the chain
+                    
+                
+            LIVELOCK: (is it so hard to find concrete examples and definition?)
+            --->favorite definition: Livelock is a special case of resource 
+                starvation where two processes follow an algorithm for resolving 
+                a deadlock that results in a cycle of different locked states 
+                because each process is attempting the same strategy to avoid the 
+                lock
+            --->DEFINITION (WIKI):A livelock is similar to a deadlock, except 
+                that the states of the processes involved in the livelock constantly 
+                change with regard to one another, none progressing. Livelock is a 
+                special case of resource starvation; the general definition only 
+                states that a specific process is not progressing.
+            --->OVERLY USED DUMB EXAMPLE: A real-world example of livelock occurs 
+                when two people meet in a narrow corridor, and each tries to be 
+                polite by moving aside to let the other pass, but they end up 
+                swaying from side to side without making any progress because they
+                both repeatedly move the same way at the same time.
+https://stackoverflow.com/questions/6155951/whats-the-difference-between-deadlock-and-livelock/27997039           
+https://stackoverflow.com/questions/1036364/good-example-of-livelock/8863671#8863671
+
+             -> MY SUMMARY: similar to a deadlock in that two+ threads are 'blocking' 
+             advancement of their respective routines - however, they are not doing so
+             explicitly ie by holding a resource. Instead, both of their acts of changing
+             states causes the other thread to be changing state as well and instead of
+             continuing their routine, they keep changing states in response to one another.
+             The most IMPORTANT and explicit example (which is why its next to deadlock) is
+             when two threads deadlocked each holding a resource that the other needs
+             both let go of the resource at the same time and wait for the other thread to
+             grab the resource they let go, instead of grabbing the other resource. Thus occurs
+             alot in deadlock prevention algorithms.
+                -> good way to handle this is to only let one thread release a resource at 
+                a time, and/or have a priority list so threads with lesser priority will let
+                go of their resources in lieu of higher priority threads.
+             
+
+    VIRTUALIZATION
+        
+        TRAP TABLE? TABLE AT MEMORY LOCATION 0?
+        
+        CONTEXT SWITCHING (OS): is the act an OS takes when it removes a process currently running on a
+            CPU and replaces it with another process. Usually entails overhead. 
+        
+        CONTEXT SWITCHING (HARDWARE?)
+        
+        SCHEDULING: An operating system manages a computer, and a computer has multiple processes
+            running at 'the same time' and limited CPUs to run those processes on. There must 
+            exist algorithms that that decide which process should be run on the CPU, and when 
+            to switch between processes. Metrics include TURNAROUND TIME and RESPONSE TIME.
+            TYPES (taken from OS comet book =))
+                - DIRECT EXECUTION
+                - LIMITED DIRECT EXECUTION
+                These assume the scheduler knows the length each job will take. Dumb.
+                - FIRST IN FIRST OUT (FIFO) 
+                - SHORTEST JOB FIRST (SJF)
+                - SHORTEST TIME TO COMPLETION FIRST (STCF)
+                - ROUND ROBIN (RR)
+                This is important
+                - MULTILEVEL FEEDBACK QUEUE (MLFQ) - priority queue!
+                This uses probability theory
+                - LOTTERY SCHEDULING
+                - LINUX COMPLETE FAIR SCHEDULER (Linux CFS) - use Red-Black trees!
+                    - on ALL methods, note the usage of I/O and how it affects scheduling. 
+            
+    RESOURCE ALLOCATION??????????????????????????????????????
+
+    PERSISTENCE: 
+        stuff like I/O, file systems, 'disk' drives. I'll pass.
+
+from threading import Thread, Lock        
+      
+for i in range(10):
+    t = Thread(target=processData, args = (i,i*i, t)) #called like Thread(target=fcnname, args=(arg1,)) for one arg.
+    t.start()
+
+mutex = Lock()
+
+def processData(data, dataplus1, thread):
+    mutex.acquire()
+    try:
+        print('thread ' + str(data) + ' reporting!' + str(dataplus1+1))
+    finally:
+        mutex.release()
+
+        
+        
+import random
+class Mutex:
+    def __init__(self):
+        self.acquired = False
+        self.owner = None
+        self.name = 'Mutex-' + str(random.random())
+        
+    def acquire(self, thread):
+        if self.acquired:
+            if self.owner == None:
+                print('ERROR: '+ self.name+' IS ACQUIRED BUT NO THREAD OWNER SPECIFIED. MOST LIKELY BEING RELEASED')
+                return False
+            else:
+                print('ERROR: Mutex is in possession by ' + self.owner)
+                return False
+        else:
+            if self.owner != None:
+                print('ERROR: ' + self.name + ' IS AVAILABLE BUT HAS A CURRENT OWNER '+self.owner+'. MOST LIKELY BEING RELEASED')
+                return False
+            print(thread.name + ' is beginning to acquire ' + self.name)
+            self.acquired = True
+            self.owner = thread.name
+            print(self.owner + ' has acquired ' + self.name)
+            
+    def release(self, thread):
+        if self.acquired:
+            if self.owner != thread.name:
+                print('ERROR: Mutex is owned by another thread')
+                return False
+            else: #owner is this thread
+                print(thread.name + ' is beginning to release ' + self.name)
+                self.acquired = False
+                self.name = None
+                print(thread.name + ' has released ' + self.name)
+        else:
+            print('ERROR: Cannot release a Mutex that is not currently acquired')
+            return False
+
+            
